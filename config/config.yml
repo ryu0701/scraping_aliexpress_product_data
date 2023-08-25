@@ -25,9 +25,9 @@ LOG:
 
 TASK:
   process:
-    max_workers: 2
+    max_workers: 3
   thread:
-    max_workers: 2
+    max_workers: 4
 
 HEADER:
   user_agent:

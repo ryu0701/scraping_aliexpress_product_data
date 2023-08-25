@@ -3,6 +3,7 @@ import yaml
 import time
 import random
 import csv
+import json
 from tqdm import tqdm
 import requests
 from requests.exceptions import RequestException, ConnectionError,  HTTPError, RetryError, Timeout
@@ -36,7 +37,7 @@ with open(Path(cwd, 'config', 'config.yml'), encoding=Constant.ENCODE_TYPE_UTF8)
 date_now = datetime.now()
 str_yyyymmdd = date_now.strftime('%Y%m%d')
 if config['CSV']['path']['output']:
-    output_csv_path = config['CSV']['path']['output']
+    output_csv_path = config['CSV']['path']['output'] + '\\' + str_yyyymmdd
 else:
     output_csv_path = str(Path(cwd, 'csv')) + '\\' + str_yyyymmdd
 
@@ -49,6 +50,8 @@ proxy_ip_list = config['PROXY']['ip_list']
 proxy_site_url = config['PROXY']['site_url']
 
 # フリーのプロキシサーバーのリストを取得する
+
+
 def get_free_proxies(proxy_site_url):
     res = requests.get(proxy_site_url)
     soup = BeautifulSoup(res.text, 'html.parser')
@@ -61,7 +64,8 @@ def get_free_proxies(proxy_site_url):
             proxies.append(f'http://{ip}:{port}')
     return proxies
 
-# proxy_list = get_free_proxies(proxy_site_url)
+
+proxy_list = get_free_proxies(proxy_site_url)
 
 # エラーカウンタ
 error_count = 0
@@ -142,7 +146,6 @@ class AppFunction:
         Rturns:
             store_cds(list): ストアーコード[store_cd]
         '''
-        str_yyyymmdd = datetime.now().strftime('%Y%m%d%H%M%S')
 
         def get_store_cd(driver):
             '''
@@ -192,7 +195,7 @@ class AppFunction:
             options = Options()
             options.add_argument('--log-level=3')
             options.add_experimental_option('excludeSwitches', ['enable-logging'])
-            # options.add_argument('--proxy-server=%s' % random.choice(proxy_list))
+            options.add_argument('--proxy-server=%s' % random.choice(proxy_list))
             if not debug_flg:
                 options.add_argument('--headless')
 
@@ -244,13 +247,13 @@ class AppFunction:
             driver.close()
             driver.quit()
 
+            time.sleep(1)
+
             return store_cd_list
 
         # 並列実行するexecutorを用意する。
         store_cd_list = []
 
-        # 出力先取得
-        output_csv_path = output_csv_path + '\\' + str_yyyymmdd
         output_store_csv = config['CSV']['output']['store']
         with open(Path(output_csv_path, output_store_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
             writer = csv.writer(f)
@@ -269,7 +272,7 @@ class AppFunction:
                     # リスト追加
                     store_cd_list += future.result()
                     # csv追記
-                    with open(Path(cwd, 'csv', output_store_csv), 'a', newline='') as f:
+                    with open(Path(output_csv_path, output_store_csv), 'a', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerows([[str(element)] for element in future.result()])
                 # プログレスバーの更新
@@ -310,7 +313,7 @@ class AppFunction:
         '''
         # 出力ファイル初期化
         output_item_csv = config['CSV']['output']['item']
-        with open(Path(cwd, 'csv', output_item_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+        with open(Path(output_csv_path, output_item_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
             writer = csv.writer(f)
             writer.writerow(Constant.HEADER_ITEM_CSV)
 
@@ -324,9 +327,9 @@ class AppFunction:
         '''
         global error_count
 
-        if error_count > thread_max_workers:
-            print(f'アクセスブロックを受けているため{thread_max_workers*5}秒間処理を停止します')
-            time.sleep(thread_max_workers*5)
+        if error_count > 10:
+            print(f'アクセスブロックを受けているため30秒間処理を停止します')
+            time.sleep(30)
             print('処理再開')
 
         def authorization(driver_path, url):
@@ -400,7 +403,7 @@ class AppFunction:
                 }
                 # プロキシ設定
                 proxies = {
-                    # 'http': random.choice(proxy_list)
+                    'http': random.choice(proxy_list)
                 }
 
                 # リクエスト
@@ -437,15 +440,20 @@ class AppFunction:
             script_str = script.string
             # ダブルクォートで囲われた文字列を切り分け
             regex = r'(?<=").*?(?=[^\\]")'
-            double_quoted_str = re.findall(regex, script_str)
+            # double_quoted_str = re.findall(regex, script_str)
 
-            match = re.search(r'var testVariable = "(.*?)";', script)
+            seoTitle = re.search(r'(?:"subject":")(.*?)(?:",)', script_str)
+            title = seoTitle.group(1) if seoTitle else ''
 
             # 配達情報の取得
             delivery_data_dict = {}
-            # delivery_data_dict[url] = [str for str in double_quoted_str if re.search(r'(配送|配達)', str)]
+            deliveryDate = re.finditer(r'(?:"deliveryDate":")(.*?)(?:",)', script_str)
+            if deliveryDate:
+                delivery_data_dict[url] = [date.group(1) for date in deliveryDate]
+            # delivery_data_dict[url] = [_str for _str in double_quoted_str if re.search(r'(配送|配達)', _str)]
+            # delivery_data_dict[url] = [_str for _str in double_quoted_str if re.search(r'(?:deliveryDate":")(.*?)(?:",)', _str)]
             # TODO:ループ処理を1回に
-            delivery_data_dict[url] = [str for str in double_quoted_str if search_str in str]
+            # delivery_data_dict[url] = [str for str in double_quoted_str if search_str in str]
 
             for val in delivery_data_dict[url]:
                 month = re.search(r'(\d|\d{2})月', val)
@@ -613,7 +621,7 @@ class PoolFucntion:
                 }
                 # プロキシ設定
                 proxies = {
-                    # 'http': random.choice(proxy_list)
+                    'http': random.choice(proxy_list)
                 }
 
                 # リクエスト
@@ -636,7 +644,8 @@ class PoolFucntion:
             # csv追記
             with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
                 writer = csv.writer(f)
-                writer.writerows([[element] for element in future.result()])
+                # writer.writerows([element for element in future.result()])
+                writer.writerows([future.result()])
             # プログレスバーの更新
             pbar.update()
         pbar.close()

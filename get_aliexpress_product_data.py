@@ -87,13 +87,14 @@ def main():
     # 変数宣言
     search_text_list = []
     store_cd_list = []
+    ordered_item_url_list = []
 
     try:
         # 【処理①】検索キーワードからストアコード取得
         if Constant.REQUEST_CD_STORE in request_cd_list:
             # 検索キーワードリスト取得
-            iuput_csv = config['CSV']['input']
-            with open(Path(cwd, 'csv', iuput_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
+            iuput_search_csv = config['CSV']['input']['search']
+            with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
                 reader = csv.reader(f)
                 search_text_list = [reader_list[0] for reader_list in reader]
             search_text_list.pop(0)  # ヘッダー分削除
@@ -111,12 +112,14 @@ def main():
                 store_cd_list: list = app_func.get_search_top_result_datas(search_text_list)
 
         # 【処理②】抽出したストアコードから注文表示のある商品ページURLを取得
-        if Constant.REQUEST_CD_ITEM in request_cd_list:
+        if Constant.REQUEST_CD_ITEM_URL in request_cd_list:
             # store_cd_listが空の場合CSVからストアコード取得
             if len(store_cd_list) == 0:
                 input_store_csv = config['CSV']['input']['store']
                 with open(Path(input_csv_path, input_store_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
-                    store_cd_list: list = f.read().split('\n')
+                    # store_cd_list: list = f.read().split('\n')
+                    reader = csv.reader(f)
+                    store_cd_list = [reader_list[0] for reader_list in reader]
                 store_cd_list.pop(0)  # ヘッダー分削除
 
             if len(store_cd_list) == 0:
@@ -137,7 +140,9 @@ def main():
             if len(ordered_item_url_list) == 0:
                 item_urls_csv = config['CSV']['input']['item_urls']
                 with open(Path(input_csv_path, item_urls_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
-                    ordered_item_url_list: list = f.read().split('\n')
+                    # ordered_item_url_list: list = f.read().split('\n')
+                    reader = csv.reader(f)
+                    ordered_item_url_list = [reader_list[0] for reader_list in reader]
                 ordered_item_url_list.pop(0)  # ヘッダー分削除
 
             if len(ordered_item_url_list) == 0:

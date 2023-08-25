@@ -22,6 +22,6 @@ class Constant:
     REQUEST_CD_ITEM = 3
 
     # CSVヘッダー
-    HEADER_STORE_CSV = ['▼ストアコード']
-    HEADER_ITEM_URLS_CSV = ['▼商品ページURL']
-    HEADER_ITEM_CSV = ['▼商品URL', '▼配送情報']
+    HEADER_STORE_CSV = ['ストアコード']
+    HEADER_ITEM_URLS_CSV = ['商品ページURL']
+    HEADER_ITEM_CSV = ['商品URL', '配送情報', '商品タイトル']
