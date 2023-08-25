@@ -1,0 +1,79 @@
+FLAG:
+  debug: False # True/False
+
+URL:
+  search_top:
+
+CSV:
+  path:
+    input:
+    # input: C:\tmp\aaa
+    output:
+    # output: C:\tmp\aaa
+  input:
+    search: search_text_list.csv
+    item_urls: scraping_item_urls.csv
+    store: scraping_store_data.csv
+  output:
+    store: scraping_store_data.csv
+    item_urls: scraping_item_urls.csv
+    item: scraping_item_data.csv
+
+LOG:
+  path:
+  name: get_aliexpress_data.log
+
+TASK:
+  process:
+    max_workers: 2
+  thread:
+    max_workers: 2
+
+HEADER:
+  user_agent:
+
+PROXY:
+  site_url: "https://free-proxy-list.net/"
+  ip_list:
+    #Australia
+    - 39.99.238.134:8000
+    #Canada
+    - 49.56.254.138:8000
+    #Germany
+    - 1.75.75.162:8000
+    #France
+    - 4.36.122.54:8000
+    #United States (Virgina)
+    - 1.81.29.67:8000
+    #Poland
+    - 4.36.175.129:8000
+    #Singapore
+    - 39.99.90.68:8000
+    #Luxembourg
+    - 07.189.11.88:8000
+    #United States (Las Vegas)
+    - 05.185.127.136:8000
+    #Netherlands
+    - 4.23.146.47:8000
+    #United States (New York)
+    - 98.98.51.35:8000
+    #Portugal
+    - 37.74.57.239:8000
+    #Lithuania
+    - 88.165.29.53:8000
+    #Italy
+    - 4.23.65.37:8000
+    #Finland
+    - .39.114.85:8000
+    #Spain
+    - 37.74.235.127:8000
+    #Belgium
+    - 78.32.45.189:8000
+    #Czech
+    - 4.23.170.136:8000
+    #Ireland
+    - 78.32.77.118:8000
+    #Netherlands
+    - 4.23.146.47:8000
+    #Tor/Onion
+    - 04.244.72.126:8000

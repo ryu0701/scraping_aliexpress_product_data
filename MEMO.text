@@ -1,0 +1,110 @@
+１.対象サイト：Aliexpress
+https://29.gigafile.nu/1125-ia0d4175e021cac9737d52010959a25cf
+
+・はじめにAliexpressキーワード検索からリストにあるKWを１件ずつ検索し、表示された全て（全ページ）のストアコード（８桁前後の数字）をリストアップする
+*この際、重複確認をして同一のストアコードはリストしない仕様
+・対象ストアの商品一覧ページに表示された「注文」表記がある商品を全て開き、商品ページURLと配送日時（期間）を抽出する
+*「配送期間」をクリックするとスピード配送或いは通常配送が表示されますが、こちらは抽出速度を見ながら実装の可否を決めさせていただきます。
+
+キーワード検索とストアの商品一覧ページですが、下記リンクのキーワードとコードを変更（直打ち）で結果が反映されますので、こちらをご利用いただけますと幸いです。
+*画面操作の方がスムーズな場合はそちらでも構いません。
+
+Aliexpress「ベストマッチ」「無料配送」ソート後のリンク（キーワードは「TOYOTA」）
+https://ja.aliexpress.com/w/wholesale-TOYOTA.html?SearchText=TOYOTA&catId=0&g=y&initiative_id=SB_20230816230341&isFavorite=y&isFreeShip=y&spm=a2g0o.home.1000002.0&trafficChannel=af
+
+ストア商品一覧「注文」絞り込み後のリンク（ストアコードは「1102282182」）
+https://ja.aliexpress.com/store/1102282182/search?spm=a2g0o.store_pc_allProduct.8148362.6.4b401342BfkT2a&origin=n&SortType=orders_desc
+
+【報酬・納期】
+１５０００円　契約確定から４日以内
+*クラウドワークス手数料込
+
+２.対象サイト：海外クラウドファンディングプラットフォーム
+
+こちらは表層的な内容となってしまいますが、下記の海外クラウドファンディングプラットフォームで各企業へ営業のメールを送るシステムを開発いただきたく存じます。
+https://www.zeczec.com/categories?scope=new
+https://www.indiegogo.com/projects/petsnowy-the-innovative-self-cleaning-litter-box#/
+主にソーシャルボタンからメッセージを送る或いは掲載している企業情報のメールアドレスへメールを送るという仕様になります。
+こちらは、先に案内させていただいた仕様と違って、処理速度は著しく遅くなければある程度かかっても構いません。
+メーリングソフト（？）サーバー（？）と連携させるのか、現状確定的な内容をお伝えできないのですが、今一度ご検討いただけますと幸いです。
+
+【報酬・納期】
+プラットフォーム１サイトにつき、８０００円　１サイトあたり契約確定から４日以内
+*クラウドワークス手数料込
+
+１.のAliexpressの抽出ですが、先にご案内させていただいた内容同様に１ストアURLと１商品ページ情報それぞれの抽出時間をおおよそで構いませんので、お伝えいただけますでしょうか？
+よろしくお願いいたします。
+
+
+
+【調査メモ】
+▼AliexpressAPIの利用検討
+現状無理
+⇒販売者用アカウントを用意する必要がある。かつ、そのアカウントのストア内の情報しか取得できない。
+
+▼requestだけで済ませる
+無理。ページのhtmlが返却されたあとに非同期で商品情報が送られてくる仕様のため。
+⇒seleniumで一番下までスクロールする必要がある
+
+▼検索URL
+URLだとうまく検索できない？initiative_idってなんだ？
+
+【仕様メモ】
+1. リスト記載のキーワードの検索結果より全ストアコードを取得
+selenium
+2. ストアコードをもとに（注文）がついた商品ページURLを全件取得
+requests
+3. 商品ページで配送情報を取得
+selenium
+
+【処理時間計測】
+1. ストアコード取得
+153.84390687942505 [sec] ※1件
+2. 商品ページURL取得
+5ストア、528商品：45秒
+
+【開発メモ】
+ストアコード全件
+↓
+商品ページURL取得
+↓
+商品ページの検索MAX取得
+↓
+商品ページ情報スクレイピング
+プロセス
+	url生成
+	リクエスト（スレッド）
+
+import requests
+from bs4 import BeautifulSoup
+import random
+
+def get_proxies():
+    url = "https://free-proxy-list.net/"
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    table = soup.find('table')
+    list_proxies = []
+    for row in table.find_all('tr'):
+        columns = row.find_all('td')
+        if columns:
+            ip = columns[0].get_text()
+            port = columns[1].get_text()
+            list_proxies.append(f"{ip}:{port}")
+    return list_proxies
+
+def proxy_request(request_type, url, **kwargs):
+    while True:
+        try:
+            proxy = random.choice(get_proxies())
+            response = requests.request(request_type, url, proxies={"http": proxy, "https": proxy}, **kwargs)
+            break
+        except:
+            pass
+    return response
+
+# Example usage
+r = proxy_request('get', "http://example.com")
+print(r.text)
+	
+
