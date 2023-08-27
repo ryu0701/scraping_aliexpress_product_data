@@ -1,55 +1,6 @@
-[D 230826 01:00:04 log:48] store_cd: 1102569127, page_count: 3
-[D 230826 01:00:04 log:48] store_cd: 1862771, page_count: 28
-[D 230826 01:00:05 log:48] store_cd: 5261042, page_count: 23
-[D 230826 01:00:18 log:48] store_cd: 1102731625, page_count: 12
-[D 230826 01:01:06 log:48] store_cd: 2132281, page_count: 4
-[D 230826 01:01:18 log:48] store_cd: 1102181655, page_count: 3
-[D 230826 01:01:19 log:48] store_cd: 5261042, page_count: 23
-[D 230826 01:01:35 log:48] store_cd: 1100290370, page_count: 9
-[D 230826 01:01:47 log:48] store_cd: 4457018, page_count: 27
-[D 230826 01:01:59 log:48] store_cd: 2132281, page_count: 4
-[D 230826 01:02:15 log:48] store_cd: 1102339770, page_count: 21
-[D 230826 01:02:32 log:48] store_cd: 1102546291, page_count: 4
-[D 230826 01:02:57 log:48] store_cd: 1950939, page_count: 8
-[D 230826 01:03:10 log:48] store_cd: 912420072, page_count: 7
-[D 230826 01:03:12 log:48] store_cd: 2132281, page_count: 4
-[D 230826 01:03:16 log:48] store_cd: 1102333472, page_count: 2
-[D 230826 01:03:25 log:48] store_cd: 5261042, page_count: 23
-[D 230826 01:03:26 log:48] store_cd: 1102913489, page_count: 3
-[D 230826 01:03:28 log:48] store_cd: 912020608, page_count: 9
-[D 230826 01:03:39 log:48] store_cd: 2132281, page_count: 4
-[D 230826 01:03:51 log:48] store_cd: 1102627397, page_count: 4
-[D 230826 01:03:57 log:48] store_cd: 1102169071, page_count: 8
-[D 230826 01:04:07 log:48] store_cd: 3299002, page_count: 9
-[D 230826 01:04:17 log:48] store_cd: 1102456378, page_count: 1
-[D 230826 01:04:21 log:48] store_cd: 912559394, page_count: 1
-[D 230826 01:04:24 log:48] store_cd: 1102627397, page_count: 4
-[D 230826 01:04:25 log:48] store_cd: 912265435, page_count: 4
-[D 230826 01:04:28 log:48] store_cd: 1102649486, page_count: 6
-[D 230826 01:04:36 log:48] store_cd: 911305139, page_count: 3
-[D 230826 01:04:38 log:48] store_cd: 911808293, page_count: 3
-[D 230826 01:04:44 log:48] store_cd: 1102569127, page_count: 3
-[D 230826 01:04:48 log:48] store_cd: 5261042, page_count: 23
-[D 230826 01:04:54 log:48] store_cd: 1102569127, page_count: 3
-[D 230826 01:04:54 log:48] store_cd: 4039004, page_count: 11
-[D 230826 01:05:07 log:48] store_cd: 1102749405, page_count: 1
-[D 230826 01:05:17 log:48] store_cd: 912420072, page_count: 7
-[D 230826 01:05:21 log:48] store_cd: 912265435, page_count: 4
-[D 230826 01:05:33 log:48] store_cd: 5888314, page_count: 7
-[D 230826 01:05:34 log:48] store_cd: 1102550055, page_count: 2
-[D 230826 01:05:39 log:48] store_cd: 1100260093, page_count: 2
-[D 230826 01:05:44 log:48] store_cd: 911346012, page_count: 16
-[D 230826 01:05:50 log:48] store_cd: 1100217103, page_count: 1
-[D 230826 01:05:50 log:48] store_cd: 1100193156, page_count: 7
-[D 230826 01:05:59 log:48] store_cd: 912024516, page_count: 23
-[D 230826 01:06:06 log:48] store_cd: 130782, page_count: 2
-[D 230826 01:06:18 log:48] store_cd: 910450003, page_count: 8
-[D 230826 01:06:23 log:48] store_cd: 1102766390, page_count: 2
-[D 230826 01:06:34 log:48] store_cd: 1102424293, page_count: 4
-[D 230826 01:06:41 log:48] store_cd: 1102586528, page_count: 23
-[D 230826 01:06:49 log:48] store_cd: 911787890, page_count: 6
-[D 230826 01:07:02 log:48] store_cd: 911727180, page_count: 4
-[D 230826 01:07:05 log:48] store_cd: 911765846, page_count: 7
-[D 230826 01:07:21 log:48] store_cd: 912420072, page_count: 7
-[D 230826 01:07:23 log:48] store_cd: 5596322, page_count: 9
-[D 230826 01:07:27 log:48] store_cd: 2064163, page_count: 21
+[E 230826 15:17:26 log:60] Bad message (TypeError('not all arguments converted during string formatting')): {'name': 'logzero_default', 'msg': 'Error:', 'args': (HTTPError('404 Client Error: Not Found for url: https://ja.aliexpress.com/store/None/search/1.html'),), 'levelname': 'ERROR', 'levelno': 40, 'pathname': 'C:\\wk\\scraping_aliexpress_product_data\\log.py', 'filename': 'log.py', 'module': 'log', 'exc_info': None, 'exc_text': None, 'stack_info': None, 'lineno': 60, 'funcName': 'error', 'created': 1693030646.7901802, 'msecs': 790.0, 'relativeCreated': 11337047.030210495, 'thread': 128, 'threadName': 'ThreadPoolExecutor-837_0', 'processName': 'SpawnProcess-2', 'process': 14440, 'message': "Bad message (TypeError('not all arguments converted during string formatting')): {'name': 'logzero_default', 'msg': 'Error:', 'args': (HTTPError('404 Client Error: Not Found for url: https://ja.aliexpress.com/store/None/search/1.html'),), 'levelname': 'ERROR', 'levelno': 40, 'pathname': 'C:\\\\wk\\\\scraping_aliexpress_product_data\\\\log.py', 'filename': 'log.py', 'module': 'log', 'exc_info': None, 'exc_text': None, 'stack_info': None, 'lineno': 60, 'funcName': 'error', 'created': 1693030646.7901802, 'msecs': 790.0, 'relativeCreated': 11337047.030210495, 'thread': 128, 'threadName': 'ThreadPoolExecutor-837_0', 'processName': 'SpawnProcess-2', 'process': 14440}", 'asctime': '230826 15:17:26', 'color': '\x1b[31m', 'end_color': '\x1b[39m'}
+[E 230826 15:17:26 log:60] Retrying...
+[E 230826 15:17:27 log:60] Bad message (TypeError('not all arguments converted during string formatting')): {'name': 'logzero_default', 'msg': 'Error:', 'args': (HTTPError('404 Client Error: Not Found for url: https://ja.aliexpress.com/store/None/search/1.html'),), 'levelname': 'ERROR', 'levelno': 40, 'pathname': 'C:\\wk\\scraping_aliexpress_product_data\\log.py', 'filename': 'log.py', 'module': 'log', 'exc_info': None, 'exc_text': None, 'stack_info': None, 'lineno': 60, 'funcName': 'error', 'created': 1693030647.1109707, 'msecs': 110.0, 'relativeCreated': 11337367.820739746, 'thread': 128, 'threadName': 'ThreadPoolExecutor-837_0', 'processName': 'SpawnProcess-2', 'process': 14440, 'message': "Bad message (TypeError('not all arguments converted during string formatting')): {'name': 'logzero_default', 'msg': 'Error:', 'args': (HTTPError('404 Client Error: Not Found for url: https://ja.aliexpress.com/store/None/search/1.html'),), 'levelname': 'ERROR', 'levelno': 40, 'pathname': 'C:\\\\wk\\\\scraping_aliexpress_product_data\\\\log.py', 'filename': 'log.py', 'module': 'log', 'exc_info': None, 'exc_text': None, 'stack_info': None, 'lineno': 60, 'funcName': 'error', 'created': 1693030647.1109707, 'msecs': 110.0, 'relativeCreated': 11337367.820739746, 'thread': 128, 'threadName': 'ThreadPoolExecutor-837_0', 'processName': 'SpawnProcess-2', 'process': 14440}", 'asctime': '230826 15:17:27', 'color': '\x1b[31m', 'end_color': '\x1b[39m'}
+[E 230826 15:17:27 log:60] Retrying...
+[E 230826 15:17:56 log:60] type object 'PoolFucntion' has no attribute 'logger'
+[I 230826 15:17:56 log:52] Å£---------------èàóùèIóπ: 2023/08/26 15:17:56---------------Å£

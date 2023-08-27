@@ -12,8 +12,8 @@ CSV:
     # output: C:\tmp\aaa
   input:
     search: search_text_list.csv
-    item_urls: scraping_item_urls.csv
-    store: scraping_store_data.csv
+    store: store_cd_list.csv
+    item_urls: item_url_list.csv
   output:
     store: scraping_store_data.csv
     item_urls: scraping_item_urls.csv

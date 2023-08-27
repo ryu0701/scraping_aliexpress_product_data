@@ -195,7 +195,7 @@ class AppFunction:
             options = Options()
             options.add_argument('--log-level=3')
             options.add_experimental_option('excludeSwitches', ['enable-logging'])
-            options.add_argument('--proxy-server=%s' % random.choice(proxy_list))
+            # options.add_argument('--proxy-server=%s' % random.choice(proxy_list))
             if not debug_flg:
                 options.add_argument('--headless')
 
@@ -224,8 +224,7 @@ class AppFunction:
             time.sleep(5)
 
             # 最初だけページの下部までスクロール
-            doc_height = driver.execute_script(
-                "return document.body.scrollHeight")
+            doc_height = driver.execute_script("return document.body.scrollHeight")
             win_height = driver.execute_script("return window.innerHeight")
             num_pages = int(doc_height / win_height)
             for page in range(1, num_pages+1):
