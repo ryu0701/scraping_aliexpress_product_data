@@ -94,7 +94,7 @@ def main():
         if Constant.REQUEST_CD_STORE in request_cd_list:
             # 検索キーワードリスト取得
             iuput_search_csv = config['CSV']['input']['search']
-            with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
+            with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_UTF8) as f:
                 reader = csv.reader(f)
                 search_text_list = [reader_list[0] for reader_list in reader]
             search_text_list.pop(0)  # ヘッダー分削除
@@ -116,7 +116,7 @@ def main():
             # store_cd_listが空の場合CSVからストアコード取得
             if len(store_cd_list) == 0:
                 input_store_csv = config['CSV']['input']['store']
-                with open(Path(input_csv_path, input_store_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
+                with open(Path(input_csv_path, input_store_csv), 'r', encoding=Constant.ENCODE_TYPE_UTF8) as f:
                     # store_cd_list: list = f.read().split('\n')
                     reader = csv.reader(f)
                     store_cd_list = [reader_list[0] for reader_list in reader]
@@ -130,16 +130,16 @@ def main():
 
             # データ取得（商品ページURL）
             if debug_flg:
-                ordered_item_url_list: list = comm_func.func_speed(app_func.get_ordered_item_datas, store_cd_list)  # 処理時間計測時
+                ordered_item_url_list: list = comm_func.func_speed(app_func.get_ordered_item_urls, store_cd_list)  # 処理時間計測時
             else:
-                ordered_item_url_list = app_func.get_ordered_item_datas(store_cd_list)
+                ordered_item_url_list = app_func.get_ordered_item_urls(store_cd_list)
 
         # 【処理③】商品ページURLから配送情報を取得
         if Constant.REQUEST_CD_ITEM in request_cd_list:
             # ordered_item_url_listが空の場合CSVからストアコード取得
             if len(ordered_item_url_list) == 0:
                 item_urls_csv = config['CSV']['input']['item_urls']
-                with open(Path(input_csv_path, item_urls_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
+                with open(Path(input_csv_path, item_urls_csv), 'r', encoding=Constant.ENCODE_TYPE_UTF8) as f:
                     # ordered_item_url_list: list = f.read().split('\n')
                     reader = csv.reader(f)
                     ordered_item_url_list = [reader_list[0] for reader_list in reader]
@@ -153,9 +153,11 @@ def main():
 
             # データ取得（配送情報）
             if debug_flg:
-                item_data_list: list = comm_func.func_speed(app_func.get_item_delivery_datas, ordered_item_url_list)  # 処理時間計測時
+                # item_data_list: list = comm_func.func_speed(app_func.get_item_datas, ordered_item_url_list)  # 処理時間計測時
+                comm_func.func_speed(app_func.get_item_datas, ordered_item_url_list)  # 処理時間計測時
             else:
-                item_data_lsit: list = app_func.get_item_delivery_datas(ordered_item_url_list)
+                # item_data_lsit: list = app_func.get_item_datas(ordered_item_url_list)
+                app_func.get_item_datas(ordered_item_url_list)
 
     except FileNotFoundError:
         logger.error("存在しないファイルを参照しようとしています。csvが指定フォルダに格納されているか確認してください。")

@@ -18,6 +18,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchDriverException, NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.proxy import Proxy
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
@@ -49,10 +50,9 @@ thread_max_workers = config['TASK']['thread']['max_workers'] if config['TASK']['
 proxy_ip_list = config['PROXY']['ip_list']
 proxy_site_url = config['PROXY']['site_url']
 
-# フリーのプロキシサーバーのリストを取得する
-
 
 def get_free_proxies(proxy_site_url):
+    '''プロキシ取得'''
     res = requests.get(proxy_site_url)
     soup = BeautifulSoup(res.text, 'html.parser')
     table = soup.find('table', class_='table table-striped table-bordered')
@@ -65,10 +65,12 @@ def get_free_proxies(proxy_site_url):
     return proxies
 
 
+# フリーのプロキシサーバーのリストを取得する
 proxy_list = get_free_proxies(proxy_site_url)
 
 # エラーカウンタ
 error_count = 0
+max_error_count = 10
 
 
 class CommonFunction:
@@ -191,11 +193,12 @@ class AppFunction:
             '''
             selenium操作
             '''
+            proxy = random.choice(proxy_list)
             # selenium起動
             options = Options()
             options.add_argument('--log-level=3')
             options.add_experimental_option('excludeSwitches', ['enable-logging'])
-            # options.add_argument('--proxy-server=%s' % random.choice(proxy_list))
+            # options.add_argument('--proxy-server=%s' % proxy)
             if not debug_flg:
                 options.add_argument('--headless')
 
@@ -254,7 +257,7 @@ class AppFunction:
         store_cd_list = []
 
         output_store_csv = config['CSV']['output']['store']
-        with open(Path(output_csv_path, output_store_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+        with open(Path(output_csv_path, output_store_csv), 'w', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
             writer = csv.writer(f)
             writer.writerow(Constant.HEADER_STORE_CSV)
 
@@ -283,7 +286,7 @@ class AppFunction:
         return store_cd_list
         # return {key: value.result() for key, value in future_list.items()}
 
-    def get_ordered_item_datas(self, store_cds: list):
+    def get_ordered_item_urls(self, store_cds: list):
         '''
         機能:
             ストアコードからそのストア全商品URLを取得する（注文がついていないものは除く）
@@ -294,14 +297,14 @@ class AppFunction:
         '''
         # 出力ファイル初期化
         output_item_urls_csv = config['CSV']['output']['item_urls']
-        with open(Path(output_csv_path, output_item_urls_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+        with open(Path(output_csv_path, output_item_urls_csv), 'w', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
             writer = csv.writer(f)
             writer.writerow(Constant.HEADER_ITEM_URLS_CSV)
 
         # 商品URLリスト取得
-        return self.pool_func.execute_process_in_store_cd(store_cds)
+        return self.pool_func.execute_multiprocess_in_store_cd(store_cds)
 
-    def get_item_delivery_datas(self, urls: list) -> dict:
+    def get_item_datas(self, urls: list) -> dict:
         '''
         機能:
             商品URLから商品ページ配送情報を取得
@@ -312,12 +315,35 @@ class AppFunction:
         '''
         # 出力ファイル初期化
         output_item_csv = config['CSV']['output']['item']
-        with open(Path(output_csv_path, output_item_csv), 'w', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+        with open(Path(output_csv_path, output_item_csv), 'w', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
             writer = csv.writer(f)
             writer.writerow(Constant.HEADER_ITEM_CSV)
 
+        # 処理を分割
+        def chunk_list(input_list, chunk_size):
+            """
+            リストを指定したサイズごとに分割する関数
+            :param input_list: 分割するリスト
+            :param chunk_size: 1つのチャンクに含まれる要素の数
+            :return: 分割されたリストのジェネレータ
+            """
+            for i in range(0, len(input_list), chunk_size):
+                yield input_list[i:i + chunk_size]
+
+        chunk_size = 1000
+
+        # item_data_list = []
+
+        self.logger.info(f'{len(urls)}件の商品データを取得します')
+
+        for chunk in chunk_list(urls, chunk_size):
+            # item_data_list += self.pool_func.execute_multithread_in_list(self.get_delivery_datas, chunk)
+            self.pool_func.execute_multithread_in_list(self.get_delivery_datas, chunk)
+            time.sleep(5)
+
         # 配送情報を取得
-        return self.pool_func.execute_get_thread_in_list(self.get_delivery_datas, urls)
+        # return item_data_list
+        return True
 
     @classmethod
     def get_delivery_datas(cls, url: str, driver_path,  params: dict = None, retries=2, timeout=10) -> list:
@@ -326,71 +352,76 @@ class AppFunction:
         '''
         global error_count
 
-        if error_count > 10:
+        if (error_count > max_error_count):
             print(f'アクセスブロックを受けているため30秒間処理を停止します')
             time.sleep(30)
+            error_count = 0
             print('処理再開')
 
-        def authorization(driver_path, url):
-            try:
-                global error_count
-                script = None
-                # 画面表示してみる
-                # driver_path = ChromeDriverManager().install()
-                options = Options()
-                options.add_argument('--log-level=3')
-                options.add_experimental_option('excludeSwitches', ['enable-logging'])
-                if not config['FLAG']['debug']:
-                    options.add_argument('--headless')
-                driver = webdriver.Chrome(service=Service(executable_path=driver_path), options=options)
-                driver.set_page_load_timeout(60)
+        # def authorization(driver_path, url, proxies):
+        #     '''認証画面突破'''
+        #     try:
+        #         global error_count
+        #         script = None
+        #         # 画面表示してみる
+        #         # driver_path = ChromeDriverManager().install()
+        #         options = Options()
+        #         options.add_argument('--log-level=3')
+        #         options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        #         options.add_argument('--proxy-server=%s' % proxies['http'])
+        #         if not config['FLAG']['debug']:
+        #             options.add_argument('--headless')
+        #         driver = webdriver.Chrome(service=Service(executable_path=driver_path), options=options)
+        #         driver.delete_all_cookies()
+        #         driver.set_page_load_timeout(60)
 
-                driver.get(url)
-                driver.implicitly_wait(1)
+        #         driver.get(url)
+        #         driver.implicitly_wait(1)
 
-                slider = driver.find_element(By.ID, 'nc_1_n1z')
+        #         slider = driver.find_element(By.ID, 'nc_1_n1z')
 
-                action = ActionChains(driver)
-                action.click_and_hold(slider).move_by_offset(300, 0).release().perform()  # x方向に100ピクセル動かす
+        #         action = ActionChains(driver)
+        #         action.click_and_hold(slider).move_by_offset(300, 0).release().perform()  # x方向に100ピクセル動かす
 
-                time.sleep(5)
-                driver.close()
-                driver.quit()
+        #         time.sleep(5)
+        #         driver.close()
+        #         driver.quit()
 
-                html_content = driver.page_source
-                soup = BeautifulSoup(html_content, 'lxml')
-                script = soup.find('script', text=re.compile('window.runParams', re.DOTALL))
+        #         html_content = driver.page_source
+        #         soup = BeautifulSoup(html_content, 'lxml')
+        #         script = soup.find('script', text=re.compile('window.runParams', re.DOTALL))
 
-            except NoSuchDriverException:
-                print("lost selenium path")
-                driver_path = ChromeDriverManager().install()
-                error_count = + 1
-                time.sleep(1)
-                return False
-            except PermissionError as e:
-                print("PermissionError: ファイルアクセス権限の問題が発生しました。")
-                error_count = + 1
-                time.sleep(1)
-                return False
-            except NoSuchElementException:
-                # print("get by selenium")
-                error_count = + 1
-                time.sleep(1)
-            except MaxRetryError as e:
-                # TODO:エラーーハンドルをもっとしっかりしたい
-                print("MaxRetryError: HTTP接続のリトライ回数が上限に達しました。")
-                error_count = + 1
-                time.sleep(1)
-            except Exception as e:
-                # その他の例外が発生した場合の処理
-                print("その他の例外が発生しました:", str(e))
-                error_count = + 1
-                time.sleep(1)
+        #     except NoSuchDriverException:
+        #         print("lost selenium path")
+        #         driver_path = ChromeDriverManager().install()
+        #         error_count = + 1
+        #         time.sleep(1)
+        #         return False
 
-            return script
+        #     except PermissionError as e:
+        #         print("PermissionError: ファイルアクセス権限の問題が発生しました。")
+        #         error_count = + 1
+        #         time.sleep(1)
+        #         return False
 
-        # 検索条件設定
-        search_str = '配達予定'
+        #     except NoSuchElementException:
+        #         # print("get by selenium")
+        #         error_count = + 1
+        #         time.sleep(1)
+
+        #     except MaxRetryError as e:
+        #         # TODO:エラーーハンドルをもっとしっかりしたい
+        #         print("MaxRetryError: HTTP接続のリトライ回数が上限に達しました。")
+        #         error_count = + 1
+        #         time.sleep(1)
+
+        #     except Exception as e:
+        #         # その他の例外が発生した場合の処理
+        #         print("その他の例外が発生しました:", str(e))
+        #         error_count = + 1
+        #         time.sleep(1)
+
+        #     return script
 
         # うまく行かない場合はretries回まで繰り返す
         for _ in range(retries):
@@ -417,28 +448,30 @@ class AppFunction:
                 script = soup.find('script', text=re.compile('window.runParams', re.DOTALL))
 
                 if script:
-                    if search_str in script.string:
+                    if re.search(r'(?:"subject":")(.*?)(?:",)', script.string):
                         break
-                else:
-                    # selenium処理
-                    script = authorization(driver_path, url)
-                    if script:
-                        break
+                # else:
+                #     # selenium処理
+                #     script = authorization(driver_path, url, proxies)
+                #     if script:
+                #         break
 
             except (ConnectionError, HTTPError, Timeout, RequestException) as e:
                 print("Error:", e)
                 print("Retrying...")
                 error_count = + 1
+                time.sleep(30)
                 # selenium処理
                 # authorization(driver_path, url)
 
         # 結果格納用リスト
         data_list = []
+        title = ''
 
         if script:
             script_str = script.string
             # ダブルクォートで囲われた文字列を切り分け
-            regex = r'(?<=").*?(?=[^\\]")'
+            # regex = r'(?<=").*?(?=[^\\]")'
             # double_quoted_str = re.findall(regex, script_str)
 
             seoTitle = re.search(r'(?:"subject":")(.*?)(?:",)', script_str)
@@ -451,7 +484,6 @@ class AppFunction:
                 delivery_data_dict[url] = [date.group(1) for date in deliveryDate]
             # delivery_data_dict[url] = [_str for _str in double_quoted_str if re.search(r'(配送|配達)', _str)]
             # delivery_data_dict[url] = [_str for _str in double_quoted_str if re.search(r'(?:deliveryDate":")(.*?)(?:",)', _str)]
-            # TODO:ループ処理を1回に
             # delivery_data_dict[url] = [str for str in double_quoted_str if search_str in str]
 
             for val in delivery_data_dict[url]:
@@ -461,14 +493,14 @@ class AppFunction:
                 if month or day:
                     data_list.append(f'配達予定：{month.group(0) + day.group(0)}')
 
-            # 情報取得できてない場合
-            if len(data_list) == 0:
-                # print(url)
-                # selenium処理
-                authorization(driver_path, url)
-                # time.sleep(15)
-            # else:
-            #     print(f'商品情報取得：{url}')
+            # # 情報取得できてない場合
+            # if len(data_list) == 0:
+            #     # print(url)
+            #     # selenium処理
+            #     authorization(driver_path, url, proxies)
+            #     # time.sleep(15)
+            # # else:
+            # #     print(f'商品情報取得：{url}')
 
         return [url, ' '.join(data_list), title]
 
@@ -486,7 +518,7 @@ class PoolFucntion:
         self.logger = Logger(debug_flg)
         self.comm_func = CommonFunction(debug_flg)
 
-    def execute_process_in_store_cd(self, store_cds: list) -> list:
+    def execute_multiprocess_in_store_cd(self, store_cds: list) -> list:
         '''
         ストアコードから商品URLを取得（重複削除処理含む）
         '''
@@ -550,6 +582,33 @@ class PoolFucntion:
 
         item_urls = []
 
+        # # マルチスレッドで全ページをスクレイピング
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=thread_max_workers) as executor:
+        #     # GETリクエストを並行処理
+        #     futures = [executor.submit(cls.get_request, url, logger) for url in urls]
+        #     # print(f'thread_count: {len(futures)}')
+
+        #     # 結果を解析
+        #     for future in concurrent.futures.as_completed(futures):
+        #         try:
+        #             result = future.result()
+        #             # 注文の表示があるページのみURL取得
+        #             if ('recent-order' in result):
+        #                 soup = BeautifulSoup(result, 'lxml')
+        #                 items = soup.select('.items-list.util-clearfix .item .detail')
+        #                 item_urls += ['https:' + item.find('a')['href'] for item in items if item.select('.recent-order')]
+        #                 # item_urls += [['https:' + item.find('a')['href']] for item in items if item.select('.recent-order')]
+
+        #                 # print(f'item_urls[5]: {item_urls[5]}')
+        #                 # print(f'len(item_urls): {len(item_urls)}')
+
+        #         except Exception as e:
+        #             logger.error(f'[ThreadError]{e}, store_cd: {store_cd}')
+
+        #     # logger.debug(f'thread_finish')
+
+        # return item_urls
+
         # マルチスレッドで全ページをスクレイピング
         with concurrent.futures.ThreadPoolExecutor(max_workers=thread_max_workers) as executor:
             # GETリクエストを並行処理
@@ -564,20 +623,22 @@ class PoolFucntion:
                     if ('recent-order' in result):
                         soup = BeautifulSoup(result, 'lxml')
                         items = soup.select('.items-list.util-clearfix .item .detail')
-                        item_urls += ['https:' + item.find('a')['href'] for item in items if item.select('.recent-order')]
-                        # item_urls += [['https:' + item.find('a')['href']] for item in items if item.select('.recent-order')]
+                        regexp = r'(?:/item/)(\d*\d)(?:\.html\?)'
+                        item_urls += [Constant.ITEM_URL_START + re.search(regexp, item.find('a')['href']).group(1) +
+                                      Constant.ITEM_URL_END for item in items if item.select('.recent-order')]
 
                         # print(f'item_urls[5]: {item_urls[5]}')
                         # print(f'len(item_urls): {len(item_urls)}')
 
                 except Exception as e:
-                    cls.logger.error(f'[ThreadError]{e}, store_cd: {store_cd}')
+                    logger.error(f'[ThreadError]{e}, store_cd: {store_cd}')
 
             # logger.debug(f'thread_finish')
 
         return item_urls
 
-    def execute_get_thread_in_list(self, func, _list: list) -> list:
+    @classmethod
+    def execute_multithread_in_list(cls, func, _list: list) -> list:
         '''
         機能:
             マルチスレッドで関数を実行
@@ -601,8 +662,8 @@ class PoolFucntion:
             futures = [executor.submit(func, val, driver_path) for val in _list]
 
             # プロセスの終了を待って辞書へ格納
-            # self.comm_func.func_progress(self.result_update, futures, result_dict)
-            self.result_append(futures, result_list, str(Path(output_csv_path, output_csv_name)))
+            # self.result_append(futures, result_list, str(Path(output_csv_path, output_csv_name)))
+            cls.result_append(futures, result_list, str(Path(output_csv_path, output_csv_name)))
 
         return result_list
 
@@ -630,18 +691,35 @@ class PoolFucntion:
 
                 return res.text
 
-            except (ConnectionError, HTTPError, Timeout, RequestException) as e:
+            except (ConnectionError, HTTPError, Timeout, RequestException, ConnectionResetError) as e:
                 logger.error("Error:", e)
                 logger.error("Retrying...")
+                time.sleep(30)
 
-    def result_append(self, futures, _list: list, csv_path):
+    # def result_append(self, futures, _list: list, csv_path):
+    #     pbar = tqdm(total=len(futures))
+    #     # 処理
+    #     for future in concurrent.futures.as_completed(futures):
+    #         # リスト追加
+    #         _list.append(future.result())
+    #         # csv追記
+    #         with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
+    #             writer = csv.writer(f)
+    #             # writer.writerows([element for element in future.result()])
+    #             writer.writerows([future.result()])
+    #         # プログレスバーの更新
+    #         pbar.update()
+    #     pbar.close()
+
+    @classmethod
+    def result_append(cls, futures, _list: list, csv_path):
         pbar = tqdm(total=len(futures))
         # 処理
         for future in concurrent.futures.as_completed(futures):
             # リスト追加
             _list.append(future.result())
             # csv追記
-            with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+            with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
                 writer = csv.writer(f)
                 # writer.writerows([element for element in future.result()])
                 writer.writerows([future.result()])
@@ -658,7 +736,7 @@ class PoolFucntion:
                 # リスト追加
                 _list += future.result()
                 # csv追記
-                with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_SJIS, newline='') as f:
+                with open(csv_path, 'a', encoding=Constant.ENCODE_TYPE_UTF8, newline='') as f:
                     writer = csv.writer(f)
                     writer.writerows([[element] for element in future.result()])
             # プログレスバーの更新

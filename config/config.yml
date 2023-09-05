@@ -27,7 +27,7 @@ TASK:
   process:
     max_workers: 3
   thread:
-    max_workers: 4
+    max_workers: 5
 
 HEADER:
   user_agent:

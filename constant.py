@@ -25,3 +25,7 @@ class Constant:
     HEADER_STORE_CSV = ['ストアコード']
     HEADER_ITEM_URLS_CSV = ['商品ページURL']
     HEADER_ITEM_CSV = ['商品URL', '配送情報', '商品タイトル']
+
+    # URL
+    ITEM_URL_START = r'https://ja.aliexpress.com/item/'
+    ITEM_URL_END = r'.html'
