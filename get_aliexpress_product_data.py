@@ -61,10 +61,11 @@ def main():
     '''
     メイン処理
     '''
-    # 処理開始
+    # 現在時刻取得
     date_now = datetime.now()
     str_yyyymmdd = date_now.strftime('%Y%m%d')
 
+    # 処理開始
     start_time = date_now.strftime('%Y/%m/%d %H:%M:%S')
     logger.info(f'▼---------------処理開始: {start_time}---------------▼')
 
@@ -94,7 +95,7 @@ def main():
         if Constant.REQUEST_CD_STORE in request_cd_list:
             # 検索キーワードリスト取得
             iuput_search_csv = config['CSV']['input']['search']
-            with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_UTF8) as f:
+            with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
                 reader = csv.reader(f)
                 search_text_list = [reader_list[0] for reader_list in reader]
             search_text_list.pop(0)  # ヘッダー分削除
@@ -110,6 +111,8 @@ def main():
                 store_cd_list: list = comm_func.func_speed(app_func.get_search_top_result_datas, search_text_list)  # 処理時間計測時
             else:
                 store_cd_list: list = app_func.get_search_top_result_datas(search_text_list)
+
+            logger.info('▼検索キーワードからストアコードリストを取得完了')
 
         # 【処理②】抽出したストアコードから注文表示のある商品ページURLを取得
         if Constant.REQUEST_CD_ITEM_URL in request_cd_list:
@@ -132,7 +135,9 @@ def main():
             if debug_flg:
                 ordered_item_url_list: list = comm_func.func_speed(app_func.get_ordered_item_urls, store_cd_list)  # 処理時間計測時
             else:
-                ordered_item_url_list = app_func.get_ordered_item_urls(store_cd_list)
+                ordered_item_url_list: list = app_func.get_ordered_item_urls(store_cd_list)
+
+            logger.info('▼ストアコードから注文表示のある商品ページURLを取得完了')
 
         # 【処理③】商品ページURLから配送情報を取得
         if Constant.REQUEST_CD_ITEM in request_cd_list:
@@ -140,7 +145,6 @@ def main():
             if len(ordered_item_url_list) == 0:
                 item_urls_csv = config['CSV']['input']['item_urls']
                 with open(Path(input_csv_path, item_urls_csv), 'r', encoding=Constant.ENCODE_TYPE_UTF8) as f:
-                    # ordered_item_url_list: list = f.read().split('\n')
                     reader = csv.reader(f)
                     ordered_item_url_list = [reader_list[0] for reader_list in reader]
                 ordered_item_url_list.pop(0)  # ヘッダー分削除
@@ -159,6 +163,8 @@ def main():
                 # item_data_lsit: list = app_func.get_item_datas(ordered_item_url_list)
                 app_func.get_item_datas(ordered_item_url_list)
 
+            logger.info('▼商品ページURLから情報を取得完了')
+
     except FileNotFoundError:
         logger.error("存在しないファイルを参照しようとしています。csvが指定フォルダに格納されているか確認してください。")
 
@@ -166,6 +172,7 @@ def main():
         logger.error(e)
 
     finally:
+        # 処理終了
         end_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         logger.info(f'▲---------------処理終了: {end_time}---------------▲')
 

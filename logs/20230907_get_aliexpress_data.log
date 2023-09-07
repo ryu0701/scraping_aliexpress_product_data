@@ -1,0 +1,50 @@
+[I 230907 08:39:40 log:52] ▼---------------処理開始: 2023/09/07 08:39:40---------------▼
+[I 230907 08:39:40 log:52] ▼検索キーワードからストアコードリストを取得開始
+[E 230907 08:39:44 log:60] Message: unknown error: cannot find Chrome binary
+    Stacktrace:
+    0   chromedriver                        0x0000000100cb7f48 chromedriver + 4226888
+    1   chromedriver                        0x0000000100cb04f4 chromedriver + 4195572
+    2   chromedriver                        0x00000001008f4d68 chromedriver + 281960
+    3   chromedriver                        0x000000010091bc24 chromedriver + 441380
+    4   chromedriver                        0x000000010091a150 chromedriver + 434512
+    5   chromedriver                        0x000000010095793c chromedriver + 686396
+    6   chromedriver                        0x0000000100957164 chromedriver + 684388
+    7   chromedriver                        0x0000000100923f1c chromedriver + 474908
+    8   chromedriver                        0x0000000100924ef4 chromedriver + 478964
+    9   chromedriver                        0x0000000100c7959c chromedriver + 3970460
+    10  chromedriver                        0x0000000100c7d6f0 chromedriver + 3987184
+    11  chromedriver                        0x0000000100c835b4 chromedriver + 4011444
+    12  chromedriver                        0x0000000100c7e2fc chromedriver + 3990268
+    13  chromedriver                        0x0000000100c561c0 chromedriver + 3826112
+    14  chromedriver                        0x0000000100c9a088 chromedriver + 4104328
+    15  chromedriver                        0x0000000100c9a1e0 chromedriver + 4104672
+    16  chromedriver                        0x0000000100ca9f28 chromedriver + 4169512
+    17  libsystem_pthread.dylib             0x00000001a8d0ffa8 _pthread_start + 148
+    18  libsystem_pthread.dylib             0x00000001a8d0ada0 thread_start + 8
+    
+[I 230907 08:39:44 log:52] ▲---------------処理終了: 2023/09/07 08:39:44---------------▲
+[I 230907 23:07:03 log:52] ▼---------------処理開始: 2023/09/07 23:07:03---------------▼
+[I 230907 23:07:03 log:52] ▼検索キーワードからストアコードリストを取得開始
+[E 230907 23:07:06 log:60] Message: unknown error: cannot find Chrome binary
+    Stacktrace:
+    0   chromedriver                        0x00000001053f7f48 chromedriver + 4226888
+    1   chromedriver                        0x00000001053f04f4 chromedriver + 4195572
+    2   chromedriver                        0x0000000105034d68 chromedriver + 281960
+    3   chromedriver                        0x000000010505bc24 chromedriver + 441380
+    4   chromedriver                        0x000000010505a150 chromedriver + 434512
+    5   chromedriver                        0x000000010509793c chromedriver + 686396
+    6   chromedriver                        0x0000000105097164 chromedriver + 684388
+    7   chromedriver                        0x0000000105063f1c chromedriver + 474908
+    8   chromedriver                        0x0000000105064ef4 chromedriver + 478964
+    9   chromedriver                        0x00000001053b959c chromedriver + 3970460
+    10  chromedriver                        0x00000001053bd6f0 chromedriver + 3987184
+    11  chromedriver                        0x00000001053c35b4 chromedriver + 4011444
+    12  chromedriver                        0x00000001053be2fc chromedriver + 3990268
+    13  chromedriver                        0x00000001053961c0 chromedriver + 3826112
+    14  chromedriver                        0x00000001053da088 chromedriver + 4104328
+    15  chromedriver                        0x00000001053da1e0 chromedriver + 4104672
+    16  chromedriver                        0x00000001053e9f28 chromedriver + 4169512
+    17  libsystem_pthread.dylib             0x00000001a8d0ffa8 _pthread_start + 148
+    18  libsystem_pthread.dylib             0x00000001a8d0ada0 thread_start + 8
+    
+[I 230907 23:07:06 log:52] ▲---------------処理終了: 2023/09/07 23:07:06---------------▲

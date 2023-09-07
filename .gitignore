@@ -1,6 +1,6 @@
 .vscode
 __pycache__
 csv/*
-!csv/scraping_item_data.csv
-!csv/scraping_item_urls.csv
+!csv/item_url_list.csv
+!csv/store_cd_list.csv
 !csv/search_text_list.csv

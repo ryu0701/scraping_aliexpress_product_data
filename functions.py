@@ -304,14 +304,14 @@ class AppFunction:
         # 商品URLリスト取得
         return self.pool_func.execute_multiprocess_in_store_cd(store_cds)
 
-    def get_item_datas(self, urls: list) -> dict:
+    def get_item_datas(self, urls: list) -> bool:
         '''
         機能:
             商品URLから商品ページ配送情報を取得
         Args:
             urls(list): 商品ページURLリスト [url, ...]
         Returns:
-            delivery_data_dict(dict): 配送情報 {商品URL: 配送情報}
+            True
         '''
         # 出力ファイル初期化
         output_item_csv = config['CSV']['output']['item']
@@ -332,14 +332,23 @@ class AppFunction:
 
         chunk_size = 1000
 
-        # item_data_list = []
+        item_data_list = chunk_list(urls, chunk_size)
 
         self.logger.info(f'{len(urls)}件の商品データを取得します')
 
-        for chunk in chunk_list(urls, chunk_size):
+        # プログレスバーの表示
+        pbar = tqdm(total=len(item_data_list))
+
+        for chunk in item_data_list:
             # item_data_list += self.pool_func.execute_multithread_in_list(self.get_delivery_datas, chunk)
             self.pool_func.execute_multithread_in_list(self.get_delivery_datas, chunk)
+            # 5秒停止
             time.sleep(5)
+            # プログレスバー更新
+            pbar.update()
+
+        # プログレスバー閉じるs
+        pbar.close()
 
         # 配送情報を取得
         # return item_data_list
@@ -713,7 +722,7 @@ class PoolFucntion:
 
     @classmethod
     def result_append(cls, futures, _list: list, csv_path):
-        pbar = tqdm(total=len(futures))
+        # pbar = tqdm(total=len(futures))
         # 処理
         for future in concurrent.futures.as_completed(futures):
             # リスト追加
@@ -724,8 +733,8 @@ class PoolFucntion:
                 # writer.writerows([element for element in future.result()])
                 writer.writerows([future.result()])
             # プログレスバーの更新
-            pbar.update()
-        pbar.close()
+            # pbar.update()
+        # pbar.close()
 
     def result_extend(self, futures, _list: list, csv_path):
         pbar = tqdm(total=len(futures))
