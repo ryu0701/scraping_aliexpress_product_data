@@ -4,6 +4,7 @@ import time
 import random
 import csv
 import json
+import math
 from tqdm import tqdm
 import requests
 from requests.exceptions import RequestException, ConnectionError,  HTTPError, RetryError, Timeout
@@ -337,7 +338,7 @@ class AppFunction:
         self.logger.info(f'{len(urls)}件の商品データを取得します')
 
         # プログレスバーの表示
-        pbar = tqdm(total=len(item_data_list))
+        pbar = tqdm(total=math.ceil(len(urls)/chunk_size))
 
         for chunk in item_data_list:
             # item_data_list += self.pool_func.execute_multithread_in_list(self.get_delivery_datas, chunk)
@@ -483,8 +484,13 @@ class AppFunction:
             # regex = r'(?<=").*?(?=[^\\]")'
             # double_quoted_str = re.findall(regex, script_str)
 
+            # 商品タイトル
             seoTitle = re.search(r'(?:"subject":")(.*?)(?:",)', script_str)
             title = seoTitle.group(1) if seoTitle else ''
+
+            # 商品カテゴリ
+            categoryName = re.search(r'(?:"categoryName":")(.*?)(?:"})', script_str)
+            category = categoryName.group(1) if categoryName else ''
 
             # 配達情報の取得
             delivery_data_dict = {}
@@ -511,7 +517,7 @@ class AppFunction:
             # # else:
             # #     print(f'商品情報取得：{url}')
 
-        return [url, ' '.join(data_list), title]
+        return [url, ' '.join(data_list), category, title]
 
 
 class PoolFucntion:

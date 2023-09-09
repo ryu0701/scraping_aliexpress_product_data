@@ -30,3 +30,4 @@ tzdata==2023.3
 urllib3==2.0.4
 webdriver-manager==4.0.0
 wsproto==1.2.0
+lxml==4.9.3
