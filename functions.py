@@ -39,9 +39,9 @@ with open(Path(cwd, 'config', 'config.yml'), encoding=Constant.ENCODE_TYPE_UTF8)
 date_now = datetime.now()
 str_yyyymmdd = date_now.strftime('%Y%m%d')
 if config['CSV']['path']['output']:
-    output_csv_path = config['CSV']['path']['output'] + '\\' + str_yyyymmdd
+    output_csv_path = str(Path(config['CSV']['path']['output'], str_yyyymmdd))
 else:
-    output_csv_path = str(Path(cwd, 'csv')) + '\\' + str_yyyymmdd
+    output_csv_path = str(Path(cwd, 'csv', str_yyyymmdd))
 
 # max_workers
 process_max_workers = config['TASK']['process']['max_workers'] if config['TASK']['process']['max_workers'] else None

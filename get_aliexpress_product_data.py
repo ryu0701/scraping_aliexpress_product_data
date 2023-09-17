@@ -80,10 +80,9 @@ def main():
         output_csv_path = str(Path(cwd, 'csv'))
 
     # 出力日ディレクトリ作成
-    output_csv_path = output_csv_path + '\\' + str_yyyymmdd
+    output_csv_path = Path(output_csv_path, str_yyyymmdd)
     # ディレクトリが存在しなければ作成
-    if not os.path.exists(output_csv_path):
-        os.makedirs(output_csv_path)
+    output_csv_path.mkdir(exist_ok=True)
 
     # 変数宣言
     search_text_list = []
@@ -97,8 +96,8 @@ def main():
             iuput_search_csv = config['CSV']['input']['search']
             with open(Path(input_csv_path, iuput_search_csv), 'r', encoding=Constant.ENCODE_TYPE_SJIS) as f:
                 reader = csv.reader(f)
-                search_text_list = [reader_list[0] for reader_list in reader]
-            search_text_list.pop(0)  # ヘッダー分削除
+                next(reader)
+                search_text_list = [reader_list for reader_list in reader]
 
             if len(search_text_list) == 0:
                 logger.error('検索キーワードが正しく取得できませでした。処理を終了します。')

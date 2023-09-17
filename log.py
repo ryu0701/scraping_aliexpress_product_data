@@ -38,7 +38,7 @@ class Logger:
         log_file_name = config['LOG']['name']
 
         # ファイル作成
-        with open(log_file_path+'\\'+exec_ymd+'_'+log_file_name, 'w', encoding='shift-jis'):
+        with open(str(Path(log_file_path, exec_ymd))+'_'+log_file_name, 'w', encoding='shift-jis'):
             pass
 
         logzero.logfile(Path(log_file_path, exec_ymd+'_'+log_file_name))

@@ -45,7 +45,7 @@ scraping_aliexpress_product_data\csv
 
 ## 【出力ファイル】
 
-▼ デフォルトは csv フォルダ
+▼ デフォルトは csv/yyyymmdd フォルダ
 
 1. scraping_store_data.csv
    検索キーワードをもとに抽出したストアコード一覧ファイル。
